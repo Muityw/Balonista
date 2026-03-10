@@ -1,7 +1,22 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
-// ─── THEME ────────────────────────────────────────────────────────────────────
-const WA_LINK = "https://wa.me/5500000000000?text=Olá!%20Gostaria%20de%20um%20orçamento%20de%20decoração!";
+// ─── BUSINESS INFO ────────────────────────────────────────────────────────────
+const WA_LINK    = "https://wa.me/5519999898759?text=Olá!%20Vi%20o%20site%20e%20gostaria%20de%20um%20orçamento%20de%20decoração!";
+const PHONE      = "(19) 99989-8759";
+const ADDRESS    = "Av. Dr. Jesuíno Marcondes Machado, 2432 — Nova Campinas, Campinas/SP";
+const MAPS_LINK  = "https://maps.google.com/?q=Av.+Dr.+Jesuíno+Marcondes+Machado,+2432,+Nova+Campinas,+Campinas,+SP";
+const INSTA_LINK = "https://instagram.com/balonistapresentes";
+const RATING     = "4,8";
+const REVIEWS    = "366";
+const HOURS      = [
+  { day:"Segunda",  h:"Fechado"       },
+  { day:"Terça",    h:"09:00 – 18:00" },
+  { day:"Quarta",   h:"09:00 – 18:00" },
+  { day:"Quinta",   h:"09:00 – 18:00" },
+  { day:"Sexta",    h:"09:00 – 18:00" },
+  { day:"Sábado",   h:"09:00 – 14:00" },
+  { day:"Domingo",  h:"Fechado"       },
+];
 
 const style = `
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap');
@@ -32,7 +47,81 @@ const style = `
   .reveal-right { opacity: 0; transform: translateX(40px); transition: opacity .75s ease, transform .75s ease; }
   .reveal-right.in { opacity: 1; transform: translateX(0); }
 
-  /* ── WA Float ── */
+  /* ── INFO BAR ── */
+  .info-bar {
+    position: relative; z-index: 400;
+    background: var(--plum-dk);
+    margin-top: 64px; /* nav height */
+  }
+  .info-bar-inner {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 0;
+    max-width: 1200px; margin: 0 auto; padding: 0 6%;
+  }
+  .ib-item {
+    display: flex; align-items: center; gap: 7px;
+    padding: 10px 20px; font-size: .8rem; font-weight: 500;
+    color: rgba(255,255,255,.8); text-decoration: none;
+    border-right: 1px solid rgba(255,255,255,.12);
+    transition: background .2s, color .2s;
+    white-space: nowrap; cursor: pointer; background: none; border-top: none; border-bottom: none; border-left: none; font-family: var(--ff-b);
+  }
+  .ib-item:last-child { border-right: none; }
+  .ib-item:hover { background: rgba(255,255,255,.08); color: #fff; }
+  .ib-rating { gap: 8px; }
+  .ib-stars { color: #fbbf24; font-weight: 700; font-size: .88rem; }
+  .ib-sub { color: rgba(255,255,255,.55); font-size: .75rem; }
+  .ib-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .ib-dot.open   { background: #4ade80; box-shadow: 0 0 6px #4ade80; }
+  .ib-dot.closed { background: #f87171; }
+  .ib-caret { font-size: .65rem; opacity: .6; margin-left: 4px; }
+  .ib-hours-btn { border-right: none; }
+  .ib-hours-drop {
+    position: absolute; top: 100%; right: 0;
+    background: var(--dark); border: 1px solid rgba(255,255,255,.1);
+    border-radius: 0 0 16px 16px;
+    padding: 16px 20px; min-width: 240px; z-index: 50;
+    box-shadow: 0 12px 32px rgba(0,0,0,.3);
+  }
+  .ib-hr-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 0; font-size: .83rem; color: rgba(255,255,255,.65);
+    border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+  .ib-hr-row.today { color: #4ade80; font-weight: 700; }
+  .ib-hr-row:last-of-type { border-bottom: none; }
+  .ib-note { font-size: .73rem; color: rgba(255,255,255,.35); margin-top: 10px; }
+  @media(max-width:700px) {
+    .info-bar-inner { flex-direction: column; align-items: flex-start; }
+    .ib-item { border-right: none; border-bottom: 1px solid rgba(255,255,255,.08); width: 100%; }
+    .ib-addr { display: none; }
+  }
+
+  /* ── FOOTER EXTRAS ── */
+  .footer-rating {
+    display: flex; align-items: center; gap: 12px; margin: 16px 0 6px;
+  }
+  .fr-stars { color: #fbbf24; font-size: 1.1rem; }
+  .footer-rating strong { display: block; font-size: .9rem; color: rgba(255,255,255,.85); font-weight: 700; }
+  .footer-rating span { font-size: .75rem; color: rgba(255,255,255,.45); }
+  .footer-hours {
+    margin-top: 18px; display: flex; flex-direction: column; gap: 4px;
+    padding: 14px 16px; background: rgba(255,255,255,.05); border-radius: 12px;
+  }
+  .footer-hours strong { font-size: .82rem; color: rgba(255,255,255,.8); margin-bottom: 4px; }
+  .footer-hours span { font-size: .78rem; color: rgba(255,255,255,.5); }
+  .footer-badges {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    max-width: 1100px; margin: 0 auto 28px; padding-top: 28px;
+    border-top: 1px solid rgba(255,255,255,.06);
+  }
+  .fbadge {
+    font-size: .75rem; font-weight: 600;
+    padding: 6px 14px; border-radius: 50px;
+    background: rgba(255,255,255,.07); color: rgba(255,255,255,.6);
+    border: 1px solid rgba(255,255,255,.1);
+  }
+
+
   .wa-float {
     position: fixed; bottom: 22px; right: 22px; z-index: 1000;
     display: flex; align-items: center; gap: 10px;
@@ -89,7 +178,7 @@ const style = `
 
   /* ── HERO ── */
   .hero {
-    min-height: 100vh; padding: 100px 6% 60px;
+    min-height: 100vh; padding: 130px 6% 60px;
     display: flex; align-items: center;
     position: relative; overflow: hidden;
     background:
@@ -530,9 +619,9 @@ function Hero() {
           <div className="hero-stats">
             <div className="stat"><span className="stat-n">500+</span><span className="stat-l">Festas realizadas</span></div>
             <div className="stat-div" />
-            <div className="stat"><span className="stat-n">100%</span><span className="stat-l">Satisfação garantida</span></div>
+            <div className="stat"><span className="stat-n">{RATING}★</span><span className="stat-l">{REVIEWS} avaliações Google</span></div>
             <div className="stat-div" />
-            <div className="stat"><span className="stat-n">5★</span><span className="stat-l">Avaliação média</span></div>
+            <div className="stat"><span className="stat-n">Campinas</span><span className="stat-l">Nova Campinas · SP</span></div>
           </div>
         </div>
         {/* VISUAL */}
@@ -766,6 +855,54 @@ function CtaFinal() {
   );
 }
 
+// ─── INFO BAR ─────────────────────────────────────────────────────────────────
+// Quick-access strip: rating · phone · address · hours badge
+function InfoBar() {
+  const [hoursOpen, setHoursOpen] = useState(false);
+  const today = new Date().getDay(); // 0=Sun … 6=Sat
+  // Map JS day index → our HOURS array index (Mon=0 … Sun=6)
+  const dayMap = [6,0,1,2,3,4,5];
+  const todayInfo = HOURS[dayMap[today]];
+  const isOpen = todayInfo && todayInfo.h !== "Fechado";
+
+  return (
+    <div className="info-bar">
+      <div className="info-bar-inner">
+        {/* Rating */}
+        <a href="https://g.co/kgs/balonista" target="_blank" rel="noopener" className="ib-item ib-rating">
+          <span className="ib-stars">★ {RATING}</span>
+          <span className="ib-sub">({REVIEWS} avaliações Google)</span>
+        </a>
+        {/* Phone */}
+        <a href={`tel:${PHONE.replace(/\D/g,"")}`} className="ib-item">
+          <span>📞</span><span>{PHONE}</span>
+        </a>
+        {/* Address */}
+        <a href={MAPS_LINK} target="_blank" rel="noopener" className="ib-item ib-addr">
+          <span>📍</span><span>Nova Campinas, Campinas/SP</span>
+        </a>
+        {/* Hours toggle */}
+        <button className="ib-item ib-hours-btn" onClick={() => setHoursOpen(o=>!o)}>
+          <span className={`ib-dot ${isOpen ? "open" : "closed"}`} />
+          <span>{isOpen ? "Aberto agora" : "Fechado"} — {todayInfo?.h}</span>
+          <span className="ib-caret">{hoursOpen ? "▲" : "▼"}</span>
+        </button>
+      </div>
+      {/* Dropdown hours */}
+      {hoursOpen && (
+        <div className="ib-hours-drop">
+          {HOURS.map((h, i) => (
+            <div key={h.day} className={`ib-hr-row ${dayMap[today] === i ? "today" : ""}`}>
+              <span>{h.day}</span><span>{h.h}</span>
+            </div>
+          ))}
+          <p className="ib-note">⚠️ Horários sujeitos a alteração em feriados</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── FOOTER ───────────────────────────────────────────────────────────────────
 function Footer() {
   return (
@@ -773,12 +910,24 @@ function Footer() {
       <div className="footer-grid">
         <div>
           <a href="#hero" className="footer-logo">Balonista ✦</a>
-          <p className="footer-desc">Decorações com balões e presentes personalizados feitos com carinho. Transformamos seus sonhos em decorações inesquecíveis.</p>
+          <p className="footer-desc">
+            Decorações com balões e presentes personalizados feitos com carinho.
+            Transformamos seus sonhos em decorações inesquecíveis em Campinas/SP.
+          </p>
+          {/* Google rating badge */}
+          <div className="footer-rating">
+            <span className="fr-stars">★★★★★</span>
+            <div>
+              <strong>{RATING} no Google</strong>
+              <span>{REVIEWS} avaliações de clientes</span>
+            </div>
+          </div>
           <div className="footer-social">
-            <a href="https://instagram.com" className="soc soc-ig" target="_blank" rel="noopener" aria-label="Instagram">📸</a>
-            <a href={WA_LINK} className="soc soc-wa" target="_blank" rel="noopener" aria-label="WhatsApp">💬</a>
+            <a href={INSTA_LINK} className="soc soc-ig" target="_blank" rel="noopener" aria-label="Instagram">📸</a>
+            <a href={WA_LINK}    className="soc soc-wa" target="_blank" rel="noopener" aria-label="WhatsApp">💬</a>
           </div>
         </div>
+
         <div className="footer-col">
           <h4>Serviços</h4>
           <ul>
@@ -787,20 +936,34 @@ function Footer() {
             ))}
           </ul>
         </div>
+
         <div className="footer-col">
-          <h4>Contato</h4>
+          <h4>Contato & Localização</h4>
           <ul>
-            <li><a href={WA_LINK} target="_blank" rel="noopener">💬 WhatsApp</a></li>
-            <li><a href="https://instagram.com" target="_blank" rel="noopener">📸 @balonista</a></li>
-            <li>📍 Sua cidade, Estado</li>
-            <li>🕐 Seg–Sáb: 8h às 18h</li>
-            <li>🕐 Dom: Mediante consulta</li>
+            <li><a href={WA_LINK} target="_blank" rel="noopener">💬 {PHONE}</a></li>
+            <li><a href={INSTA_LINK} target="_blank" rel="noopener">📸 @balonistapresentes</a></li>
+            <li><a href={MAPS_LINK} target="_blank" rel="noopener">📍 Av. Dr. Jesuíno M. Machado, 2432</a></li>
+            <li style={{color:"rgba(255,255,255,.4)", fontSize:".78rem"}}>Nova Campinas — Campinas/SP, 13092-108</li>
           </ul>
+          <div className="footer-hours">
+            <strong>🕐 Horário de Atendimento</strong>
+            {HOURS.filter(h => h.h !== "Fechado").slice(0,2).map(h => (
+              <span key={h.day}>{h.day}: {h.h}</span>
+            ))}
+            <span style={{opacity:.55, fontSize:".75rem"}}>Seg. e Dom.: Fechado</span>
+          </div>
         </div>
       </div>
+
+      <div className="footer-badges">
+        <span className="fbadge">🏳️‍🌈 Empresa LGBTQ+ Friendly</span>
+        <span className="fbadge">👩‍💼 Empresa de Empreendedoras</span>
+        <span className="fbadge">📦 Entrega · Retirada · Loja</span>
+      </div>
+
       <div className="footer-bottom">
-        <span>© 2025 Balonista Presentes e Balões. Todos os direitos reservados.</span>
-        <span style={{ color:"rgba(255,255,255,.3)" }}>Feito com 💝</span>
+        <span>© 2025 Balonista Presentes e Balões · Campinas/SP</span>
+        <span style={{ color:"rgba(255,255,255,.3)" }}>Feito com 💝 para alegrar sua festa</span>
       </div>
     </footer>
   );
@@ -824,6 +987,7 @@ export default function App() {
       <style>{style}</style>
       <WaFloat />
       <Navbar />
+      <InfoBar />
       <main>
         <Hero />
         <Sobre />
